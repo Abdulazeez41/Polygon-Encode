@@ -1,53 +1,41 @@
-// SPDX-License-Identifier: MIT
-pragma solidity ^0.8.11;
+//SPDX-License-Identifier: Unlicense
+pragma solidity 0.8.4; 
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
+contract mint_NFT is ERC721 {
 
-contract PolygonNFT is ERC721, Ownable {
-    
-    using Counters for Counters.Counter;
-    using Strings for uint256;
-
-    Counters.Counter private _tokenIds;
-  
+    uint256 public tokenCounter;
     mapping (uint256 => string) private _tokenURIs;
 
-    constructor() ERC721("myNFT", "NFT") {}
-
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
-        internal
-        virtual
-    {
-        _tokenURIs[tokenId] = _tokenURI;
+    constructor(
+        string memory name,
+        string memory symbol
+    ) ERC721(name, symbol) {
+        tokenCounter = 0;
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        virtual
-        override
-        returns (string memory)
-    {
-        require(_exists(tokenId), "Token does not exist");
-        string memory _tokenURI = _tokenURIs[tokenId];
+    function mint(string memory _tokenURI) public {
+        _safeMint(msg.sender, tokenCounter);
+        _setTokenURI(tokenCounter, _tokenURI);
 
-        return _tokenURI;
+        tokenCounter++;
     }
 
-    function mint(address recipient, string memory uri)
-        public
-        onlyOwner
-        returns (uint256)
-    {
-        _tokenIds.increment();
-        uint256 newItemId = _tokenIds.current();
-
-        _mint(recipient, newItemId);
-        _setTokenURI(newItemId, uri);
-
-        return newItemId;
+    function _setTokenURI(uint256 _tokenId, string memory _tokenURI) internal virtual {
+        require(
+            _exists(_tokenId),
+            "ERC721Metadata: URI set of nonexistent token"
+        );  // Checks if the tokenId exists
+        _tokenURIs[_tokenId] = _tokenURI;
     }
+
+    function tokenURI(uint256 _tokenId) public view virtual override returns(string memory) {
+        require(
+            _exists(_tokenId),
+            "ERC721Metadata: URI set of nonexistent token"
+        );
+        return _tokenURIs[_tokenId];
+    }
+
 }
