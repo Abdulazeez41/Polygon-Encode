@@ -1,43 +1,29 @@
-require("@nomiclabs/hardhat-waffle");
-require("@nomiclabs/hardhat-etherscan")
-require("dotenv").config();
+require('dotenv').config();
+require("@nomiclabs/hardhat-ethers");
+require("@nomiclabs/hardhat-etherscan");
 
-task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
-  const accounts = await hre.ethers.getSigners();
-
-  for (const account of accounts) {
-    console.log(account.address);
-  }
-});
-
-task("deploy", "Deploy the smart contracts", async(taskArgs, hre) => {
-
-  const NFTs = await hre.ethers.getContractFactory("NFT");
-  const myNft = await NFTs.deploy("NFT Contract", "NFT");
-
-  await myNft.deployed();
-
-  await hre.run("verify:verify", {
-    address: artwork.address,
-    constructorArguments: [
-      "NFT Contract",
-      "NFT"
-    ]
-  })
-
-})
+var secret = require("./secret.json");
 
 module.exports = {
-  solidity: "0.8.4",
+  defaultNetwork: "mumbai",
   networks: {
+    hardhat: {
+    },
     mumbai: {
-      url: "https://matic-testnet-archive-rpc.bwarelabs.com",
-      accounts: [
-        process.env.PRIVATE_KEY,
-      ]
+      url: `https://rpc-mumbai.maticvigil.com/v1/${secret.APP_ID}`,
+      accounts: [secret.PRIVATE_KEY1, secret.PRIVATE_KEY2 ]
     }
   },
   etherscan: {
-    apiKey: process.env.POLYGONSCAN_KEY,
-  }
-};
+    apiKey: secret.POLYGONSCAN_API_KEY
+  },
+  solidity: {
+    version: "0.8.4",
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200
+      }
+    }
+  },
+}
